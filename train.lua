@@ -71,8 +71,8 @@ function train(model, criterion)
 
 		local _, loss = optim.adam(feval, parameters, optim_state)
 		collectgarbage()
-                print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], gradParameters:norm()))
-                
+
+
 		if i % opt.numItersToSave == 0 then
 			print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], gradParameters:norm()))
 
@@ -81,14 +81,14 @@ function train(model, criterion)
                         table.insert(lossTable, loss[1])
                         table.insert(valLossTable, newval/opt.validationSize)
 
-                        torch.save("losses.t7", lossTable)
-                        torch.save("valLosses.t7", valLossTable)
+                        torch.save(opt.modLossFile, lossTable)
+                        torch.save(opt.valLossFile, valLossTable)
 
                         print(string.format("validation loss = %6.8f", newval))
                         if newval < minval then
                                 minval = newval
                                 print("model saved")
-                                torch.save("model.t7", model)
+                                torch.save(opt.modFile, model)
                         end
 		end
 	end
