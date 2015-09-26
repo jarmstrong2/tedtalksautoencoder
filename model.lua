@@ -29,7 +29,7 @@ end
 
 function getModel()
 	criterion = nn.MSECriterion()
-	criterion.sizeAverage = true
+	criterion.sizeAverage = false
 
 	-- set up of model layers
 	layerxy = nn.Linear(opt.xSize, opt.ySize)
