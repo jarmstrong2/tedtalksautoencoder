@@ -2,8 +2,6 @@ require 'model'
 require 'train'
 require 'torch'
 
-weightsPerRow = 15
-
 local cmd = torch.CmdLine()
 
 cmd:text()
