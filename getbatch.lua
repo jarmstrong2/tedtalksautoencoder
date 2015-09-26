@@ -40,7 +40,7 @@ function getLineData(oldcount, curcount)
 end
 
 function getNewData(filenumber)
-	dataload = torch.load('newtrain'..tostring(filenumber)..'.t7')
+	dataload = torch.load(opt.folderPath .. 'newtrain'..tostring(filenumber)..'.t7')
 	return dataload
 end
 

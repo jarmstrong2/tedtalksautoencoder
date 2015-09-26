@@ -1,11 +1,12 @@
 require 'nn'
 require 'optim'
-require 'getbatchnew'
+require 'getbatch'
+require 'torch'
 
 function train(model, criterion)
         function gettensor(set)
                 isstarted = false
-                for i = 1, 1024 do
+                for i = 1, opt.validationSize do
                         if isstarted then
                                 valsettensor = torch.cat(valsettensor, set[i], 2)
                         else
@@ -27,7 +28,7 @@ function train(model, criterion)
                 return loss
         end
 
-        valset = torch.load('val.t7')
+        valset = torch.load(opt.folderPath .. 'val.t7')
         valset = gettensor(valset)
         minval = 1/0
 
@@ -42,7 +43,7 @@ function train(model, criterion)
                 -- reset gradients
                 gradParameters:zero()
 
-                input = getbatch(128)
+                input = getbatch(opt.batchSize)
                 input = input:cuda()
                 --print(input)
 
@@ -61,24 +62,33 @@ function train(model, criterion)
                 return loss, gradParameters
 	end
 
-	local optim_state = {learningRate = 1e-2}
-	local iterations = 500000
+	local optim_state = {learningRate = opt.lr}
+	local iterations = numberOfIterations
+        local lossTable = {}
+        local valLossTable = {}
 
-	for i = 1, iterations do
+	for i = 1, opt.numIters do
 
 		local _, loss = optim.adam(feval, parameters, optim_state)
 		collectgarbage()
-		--print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], gradParameters:norm()))
-
-		if i % 1000 == 0 then
+                print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], gradParameters:norm()))
+                
+		if i % opt.numItersToSave == 0 then
 			print(string.format("iteration %4d, loss = %6.8f, gradnorm = %6.4e", i, loss[1], gradParameters:norm()))
 
                         newval = validation()
+
+                        table.insert(lossTable, loss[1])
+                        table.insert(valLossTable, newval/opt.validationSize)
+
+                        torch.save("losses.t7", lossTable)
+                        torch.save("valLosses.t7", valLossTable)
+
                         print(string.format("validation loss = %6.8f", newval))
                         if newval < minval then
                                 minval = newval
                                 print("model saved")
-                                torch.save("model2_2_trained.t7", model)
+                                torch.save("model.t7", model)
                         end
 		end
 	end
